@@ -17,6 +17,14 @@ class TaskTableViewCell: UITableViewCell {
         return label
     }()
     
+    private lazy var checkImage: UIImageView = {
+        let image = UIImageView()
+        
+        return image
+    }()
+    
+    private var checkMarkImage = UIImage(systemName: "checkmark.seal.fill")
+    
     override class func awakeFromNib() {
         super.awakeFromNib()
     }
@@ -24,11 +32,19 @@ class TaskTableViewCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
+        addSubview(checkImage)
         addSubview(label)
         
+        checkImage.snp.makeConstraints { make in
+            make.centerY.equalToSuperview()
+            make.trailing.equalToSuperview().inset(10)
+            make.size.equalTo(50)
+        }
+        
         label.snp.makeConstraints { make in
-            make.center.equalToSuperview()
-            make.height.equalTo(20)
+            make.centerY.equalToSuperview()
+            make.leading.equalToSuperview().offset(10)
+            make.trailing.equalTo(checkImage.snp.leading).offset(-10)
         }
     }
     
@@ -36,7 +52,9 @@ class TaskTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func config(text: String){
+    func config(text: String, isDone: Bool){
         label.text = text
+        
+        checkImage.image = isDone ? checkMarkImage : .none
     }
 }

@@ -17,7 +17,7 @@ class MainViewController: UIViewController {
         button.setTitle("Add new item", for: .normal)
         button.setTitleColor(.white, for: .normal)
         
-//        let tap = UITapGestureRecognizer(target: self, action: #selector(newTaskButtonTapped))
+        //        let tap = UITapGestureRecognizer(target: self, action: #selector(newTaskButtonTapped))
         
         button.addTarget(self, action: #selector(newTaskButtonTapped), for: .touchUpInside)
         
@@ -31,6 +31,7 @@ class MainViewController: UIViewController {
         tf.borderStyle = .line
         tf.placeholder = "Search"
         tf.setLeftPaddingPoints(20)
+        tf.delegate = self
         
         return tf
     }()
@@ -47,11 +48,13 @@ class MainViewController: UIViewController {
         return tv
     }()
     
-    var array: [String] = ["Сделать проект", "Устроить созвон", "Посмотреть кино"]
-    
-    let userDefaults = UserDefaults.standard
-    
+    var tasks: [Task] = []
+    var searchedTasks: [Task] = []
+    var isSearching: Bool = false
+    var searchingText: String = ""
     let tasksKey = "Tasks"
+    
+    let filePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Tasks.plist")
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -62,6 +65,8 @@ class MainViewController: UIViewController {
         setupConstraints()
         
         getTasksData()
+        
+        
         
     }
     
@@ -92,10 +97,30 @@ class MainViewController: UIViewController {
     }
     
     private func getTasksData() {
-        if let tasks = userDefaults.stringArray(forKey: tasksKey){
-            array = tasks
-            reloadData()
+        
+        let decoder = PropertyListDecoder()
+        
+        do{
+            if let data = try? Data(contentsOf: filePath!) {
+                tasks = try decoder.decode([Task].self, from: data)
+                self.reloadData()
+            }
+        }catch{
+            print("failed to decode Data: \(error) ")
         }
+    }
+    
+    private func saveTasksData() {
+        let encoder = PropertyListEncoder()
+        
+        do{
+            let data = try encoder.encode(self.tasks)
+            try data.write(to: filePath!)
+            self.reloadData()
+        }catch{
+            print("failed to encode Data: \(error) ")
+        }
+        
     }
     
     private func reloadData() {
@@ -118,9 +143,15 @@ class MainViewController: UIViewController {
             
             guard let text = tf.text else {return}
             if !text.isEmpty{
-                self.array.append(text)
-                self.reloadData()
-                self.userDefaults.set(self.array, forKey: self.tasksKey)
+                
+                let task = Task(id: UUID().uuidString, title: text, isDone: false)
+                if self.isSearching{
+                    if text.lowercased().contains(self.searchingText.lowercased()){
+                        self.searchedTasks.append(task)
+                    }
+                }
+                self.tasks.append(task)
+                self.saveTasksData()
                 
             }
         }
@@ -128,21 +159,127 @@ class MainViewController: UIViewController {
         alertView.addAction(action)
         present(alertView, animated: true)
     }
-
+    
 }
 
 extension MainViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        array.count
+        
+        if isSearching{
+            return searchedTasks.count
+        }else{
+            return tasks.count
+        }
+        
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TaskTableViewCell", for: indexPath) as! TaskTableViewCell
         
-        cell.config(text: array[indexPath.row])
+        var task = Task(id: "", title: "", isDone: false)
+        
+        if isSearching{
+            task = searchedTasks[indexPath.row]
+        }else{
+            task = tasks[indexPath.row]
+        }
+        
+        cell.config(text: task.title, isDone: task.isDone)
         
         return cell
     }
     
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        if isSearching{
+            searchedTasks[indexPath.row] = searchedTasks[indexPath.row].changeIsDoneProperty()
+        }else{
+            tasks[indexPath.row] = tasks[indexPath.row].changeIsDoneProperty()
+        }
+        
+        saveTasksData()
+        tableView.deselectRow(at: indexPath, animated: true)
+        
+    }
     
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        
+        return true
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if (editingStyle == .delete) {
+            
+            if isSearching{
+                for i in tasks{
+                    if searchedTasks[indexPath.row].id == i.id{
+                        searchedTasks.remove(at: indexPath.row)
+                        tasks.remove(at: indexPath.row)
+                    }
+                }
+                
+            }else{
+                tasks.remove(at: indexPath.row)
+            }
+            
+            saveTasksData()
+        }
+    }
+}
+
+extension MainViewController: UITextFieldDelegate {
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        
+        textField.resignFirstResponder()
+        return true
+        
+    }
+    
+//    func textFieldDidEndEditing(_ textField: UITextField) {
+//
+//        guard let text = textField.text else {
+//            isSearching = false
+//            self.reloadData()
+//            return
+//        }
+//
+//        if !text.isEmpty{
+//            isSearching = true
+//            searchingText = text
+//            searchedTasks.removeAll()
+//            for i in tasks {
+//                if i.title.lowercased().contains("\(text.lowercased())"){
+//                    searchedTasks.append(i)
+//                }
+//            }
+//            self.reloadData()
+//        }else{
+//            isSearching = false
+//            self.reloadData()
+//        }
+//    }
+    
+    func textFieldDidChangeSelection(_ textField: UITextField) {
+        guard let text = textField.text else {
+            isSearching = false
+            self.reloadData()
+            return
+        }
+        
+        if !text.isEmpty{
+            isSearching = true
+            searchingText = text
+            searchedTasks.removeAll()
+            for i in tasks {
+                if i.title.lowercased().contains("\(text.lowercased())"){
+                    searchedTasks.append(i)
+                }
+            }
+            self.reloadData()
+        }else{
+            isSearching = false
+            self.reloadData()
+        }
+    }
 }
