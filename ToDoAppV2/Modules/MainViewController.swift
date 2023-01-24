@@ -7,6 +7,7 @@
 
 import UIKit
 import SnapKit
+import CoreData
 
 class MainViewController: UIViewController {
     
@@ -54,6 +55,8 @@ class MainViewController: UIViewController {
     var searchingText: String = ""
     let tasksKey = "Tasks"
     
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    
     let filePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Tasks.plist")
     
     override func viewDidLoad() {
@@ -98,29 +101,23 @@ class MainViewController: UIViewController {
     
     private func getTasksData() {
         
-        let decoder = PropertyListDecoder()
+        let request: NSFetchRequest<Task> = Task.fetchRequest()
         
         do{
-            if let data = try? Data(contentsOf: filePath!) {
-                tasks = try decoder.decode([Task].self, from: data)
-                self.reloadData()
-            }
+            try tasks = context.fetch(request)
+            self.reloadData()
         }catch{
-            print("failed to decode Data: \(error) ")
+            print("failed to get data \(error) ")
         }
     }
     
     private func saveTasksData() {
-        let encoder = PropertyListEncoder()
         
         do{
-            let data = try encoder.encode(self.tasks)
-            try data.write(to: filePath!)
-            self.reloadData()
+            try context.save()
         }catch{
-            print("failed to encode Data: \(error) ")
+            print("failed to save Data: \(error) ")
         }
-        
     }
     
     private func reloadData() {
@@ -143,16 +140,13 @@ class MainViewController: UIViewController {
             
             guard let text = tf.text else {return}
             if !text.isEmpty{
+                let task = Task(context: self.context)
                 
-                let task = Task(id: UUID().uuidString, title: text, isDone: false)
-                if self.isSearching{
-                    if text.lowercased().contains(self.searchingText.lowercased()){
-                        self.searchedTasks.append(task)
-                    }
-                }
-                self.tasks.append(task)
+                task.title = text
+                task.isDone = false
+                task.id = UUID().uuidString
                 self.saveTasksData()
-                
+                self.getTasksData()
             }
         }
         
@@ -176,27 +170,23 @@ extension MainViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TaskTableViewCell", for: indexPath) as! TaskTableViewCell
         
-        var task = Task(id: "", title: "", isDone: false)
+//        var task = Task(id: "", title: "", isDone: false)
         
-        if isSearching{
-            task = searchedTasks[indexPath.row]
-        }else{
-            task = tasks[indexPath.row]
-        }
+//        if isSearching{
+//            task = searchedTasks[indexPath.row]
+//        }else{
+//            task = tasks[indexPath.row]
+//        }
         
-        cell.config(text: task.title, isDone: task.isDone)
+//        cell.config(text: task.title, isDone: task.isDone)
         
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        if isSearching{
-            searchedTasks[indexPath.row] = searchedTasks[indexPath.row].changeIsDoneProperty()
-        }else{
-            tasks[indexPath.row] = tasks[indexPath.row].changeIsDoneProperty()
-        }
         
+        tasks[indexPath.row].isDone = !tasks[indexPath.row].isDone
         saveTasksData()
         tableView.deselectRow(at: indexPath, animated: true)
         
@@ -272,9 +262,9 @@ extension MainViewController: UITextFieldDelegate {
             searchingText = text
             searchedTasks.removeAll()
             for i in tasks {
-                if i.title.lowercased().contains("\(text.lowercased())"){
-                    searchedTasks.append(i)
-                }
+//                if i.title.lowercased().contains("\(text.lowercased())"){
+//                    searchedTasks.append(i)
+//                }
             }
             self.reloadData()
         }else{

@@ -14,7 +14,6 @@
 		02DA5DED2973F67A00C5D37A /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 02DA5DEC2973F67A00C5D37A /* SnapKit */; };
 		02DA5DEF2973FE0E00C5D37A /* TaskTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02DA5DEE2973FE0E00C5D37A /* TaskTableViewCell.swift */; };
 		02DA5DF229783D1F00C5D37A /* TextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02DA5DF129783D1F00C5D37A /* TextField.swift */; };
-		02DA5DF5297950C800C5D37A /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02DA5DF4297950C800C5D37A /* Task.swift */; };
 		02DA5E1E297E9CDB00C5D37A /* CoreDataExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02DA5E1D297E9CDB00C5D37A /* CoreDataExtension.swift */; };
 		02DA5E21297E9DA400C5D37A /* DataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 02DA5E1F297E9DA400C5D37A /* DataModel.xcdatamodeld */; };
 /* End PBXBuildFile section */
@@ -28,7 +27,6 @@
 		02DA5DE62973F41A00C5D37A /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		02DA5DEE2973FE0E00C5D37A /* TaskTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskTableViewCell.swift; sourceTree = "<group>"; };
 		02DA5DF129783D1F00C5D37A /* TextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextField.swift; sourceTree = "<group>"; };
-		02DA5DF4297950C800C5D37A /* Task.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Task.swift; sourceTree = "<group>"; };
 		02DA5E1D297E9CDB00C5D37A /* CoreDataExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataExtension.swift; sourceTree = "<group>"; };
 		02DA5E20297E9DA400C5D37A /* DataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DataModel.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -64,12 +62,12 @@
 		02DA5DD12973F2E900C5D37A /* ToDoAppV2 */ = {
 			isa = PBXGroup;
 			children = (
+				02DA5E22297E9E1500C5D37A /* Models */,
 				02DA5DF029783D0800C5D37A /* Extensions */,
 				02DA5DEA2973F57800C5D37A /* Utils */,
 				02DA5DE92973F55500C5D37A /* Resources */,
 				02DA5DE82973F53800C5D37A /* Modules */,
 				02DA5DE02973F2EA00C5D37A /* Info.plist */,
-				02DA5E1F297E9DA400C5D37A /* DataModel.xcdatamodeld */,
 			);
 			path = ToDoAppV2;
 			sourceTree = "<group>";
@@ -113,7 +111,6 @@
 		02DA5DF3297950BB00C5D37A /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				02DA5DF4297950C800C5D37A /* Task.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -124,6 +121,14 @@
 				02DA5E1D297E9CDB00C5D37A /* CoreDataExtension.swift */,
 			);
 			path = "AppDelegate Extensions";
+			sourceTree = "<group>";
+		};
+		02DA5E22297E9E1500C5D37A /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				02DA5E1F297E9DA400C5D37A /* DataModel.xcdatamodeld */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -206,7 +211,6 @@
 				02DA5DE72973F41A00C5D37A /* MainViewController.swift in Sources */,
 				02DA5E1E297E9CDB00C5D37A /* CoreDataExtension.swift in Sources */,
 				02DA5E21297E9DA400C5D37A /* DataModel.xcdatamodeld in Sources */,
-				02DA5DF5297950C800C5D37A /* Task.swift in Sources */,
 				02DA5DEF2973FE0E00C5D37A /* TaskTableViewCell.swift in Sources */,
 				02DA5DF229783D1F00C5D37A /* TextField.swift in Sources */,
 			);
